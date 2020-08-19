@@ -1038,6 +1038,28 @@
           <p>This algorithm always returns -1 if _fromIndex_ &gt; the length of _string_.</p>
         </emu-note>
       </emu-clause>
+
+      <emu-clause id="sec-stringincludesat" aoid="StringIncludesAt">
+        <h1>Runtime Semantics: StringIncludesAt ( _string_, _substring_, _atIndex_ )</h1>
+        <p>The abstract operation StringIncludesAt takes arguments _string_ (a String), _substring_ (a String), and _atIndex_ (a non-negative integer). It performs the following steps when called:</p>
+        <emu-alg>
+          1. Assert: Type(_string_) is String.
+          1. Assert: Type(_substring_) is String.
+          1. Assert: ! IsNonNegativeInteger(_atIndex_) is *true*.
+          1. Let _len_ be the length of _string_.
+          1. If _substring_ is the empty String and _atIndex_ &le; _len_, return *true*.
+          1. Let _substringLen_ be the length of _substring_.
+          1. If _atIndex_ + _substringLen_ &gt; _len_, return *false*.
+          1. If for all non-negative integers _j_ less than _substringLen_, the code unit at index _atIndex_ + _j_ within _string_ is the same as the code unit at index _j_ within _substring_, return *true*.
+          1. Otherwise, return *false*.
+        </emu-alg>
+        <emu-note>
+          <p>If _substring_ is the empty String and _atIndex_ is less than or equal to the length of _string_, this algorithm returns *true*. The empty String is effectively found at every position within a string, including after the last code unit.</p>
+        </emu-note>
+        <emu-note>
+          <p>This algorithm always returns *false* if _atIndex_ &gt; the length of _string_.</p>
+        </emu-note>
+      </emu-clause>
     </emu-clause>
 
     <emu-clause id="sec-ecmascript-language-types-symbol-type">
@@ -5625,19 +5647,6 @@
       </emu-alg>
     </emu-clause>
 
-    <emu-clause id="sec-isstringprefix" aoid="IsStringPrefix">
-      <h1>IsStringPrefix ( _p_, _q_ )</h1>
-      <p>The abstract operation IsStringPrefix takes arguments _p_ (a String) and _q_ (a String). It determines if _p_ is a prefix of _q_. It performs the following steps when called:</p>
-      <emu-alg>
-        1. Assert: Type(_p_) is String.
-        1. Assert: Type(_q_) is String.
-        1. If _q_ can be the string-concatenation of _p_ and some other String _r_, return *true*. Otherwise, return *false*.
-      </emu-alg>
-      <emu-note>
-        <p>Any String is a prefix of itself, because _r_ may be the empty String.</p>
-      </emu-note>
-    </emu-clause>
-
     <emu-clause id="sec-samevalue" aoid="SameValue">
       <h1>SameValue ( _x_, _y_ )</h1>
       <p>The abstract operation SameValue takes arguments _x_ (an ECMAScript language value) and _y_ (an ECMAScript language value) and returns a completion record whose [[Type]] is ~normal~ and whose [[Value]] is a Boolean. It performs the following steps when called:</p>
@@ -5696,8 +5705,8 @@
           1. Let _py_ be ? ToPrimitive(_y_, hint Number).
           1. Let _px_ be ? ToPrimitive(_x_, hint Number).
         1. [id="step-arc-string-check"] If Type(_px_) is String and Type(_py_) is String, then
-          1. If IsStringPrefix(_py_, _px_) is *true*, return *false*.
-          1. If IsStringPrefix(_px_, _py_) is *true*, return *true*.
+          1. If ! StringIncludesAt(_px_, _py_, 0) is *true*, return *false*.
+          1. If ! StringIncludesAt(_py_, _px_, 0) is *true*, return *true*.
           1. Let _k_ be the smallest nonnegative integer such that the code unit at index _k_ within _px_ is different from the code unit at index _k_ within _py_. (There must be such a _k_, for neither String is a prefix of the other.)
           1. Let _m_ be the integer that is the numeric value of the code unit at index _k_ within _px_.
           1. Let _n_ be the integer that is the numeric value of the code unit at index _k_ within _py_.
@@ -31031,9 +31040,9 @@ THH:mm:ss.sss
           1. Let _p_ be 0.
           1. Let _q_ be _p_.
           1. Repeat, while _q_ &ne; _s_,
-            1. Let _e_ be SplitMatch(_S_, _q_, _R_).
-            1. If _e_ is *false*, set _q_ to _q_ + 1.
+            1. If ! StringIncludesAt(_S_, _R_, _q_) is *false*, then set _q_ to _q_ + 1.
             1. Else,
+              1. Let _e_ be _q_ + the length of _R_.
               1. Assert: _e_ is an integer index &le; _s_.
               1. If _e_ = _p_, set _q_ to _q_ + 1.
               1. Else,
@@ -31055,19 +31064,6 @@ THH:mm:ss.sss
         <emu-note>
           <p>The `split` function is intentionally generic; it does not require that its *this* value be a String object. Therefore, it can be transferred to other kinds of objects for use as a method.</p>
         </emu-note>
-
-        <emu-clause id="sec-splitmatch" aoid="SplitMatch">
-          <h1>Runtime Semantics: SplitMatch ( _S_, _q_, _R_ )</h1>
-          <p>The abstract operation SplitMatch takes arguments _S_ (a String), _q_ (an integer), and _R_ (a String). It returns either *false* or the end index of a match. It performs the following steps when called:</p>
-          <emu-alg>
-            1. Assert: Type(_R_) is String.
-            1. Let _r_ be the number of code units in _R_.
-            1. Let _s_ be the number of code units in _S_.
-            1. If _q_ + _r_ &gt; _s_, return *false*.
-            1. If there exists an integer _i_ between 0 (inclusive) and _r_ (exclusive) such that the code unit at index _q_ + _i_ within _S_ is different from the code unit at index _i_ within _R_, return *false*.
-            1. Return _q_ + _r_.
-          </emu-alg>
-        </emu-clause>
       </emu-clause>
 
       <emu-clause id="sec-string.prototype.startswith">
