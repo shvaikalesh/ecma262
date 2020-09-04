@@ -13638,7 +13638,6 @@
           1. Else,
             1. Let _thisValue_ be *undefined*.
           1. Let _argList_ be ? ArgumentListEvaluation of _arguments_.
-          1. If Type(_func_) is not Object, throw a *TypeError* exception.
           1. If IsCallable(_func_) is *false*, throw a *TypeError* exception.
           1. If _tailPosition_ is *true*, perform PrepareForTailCall().
           1. Let _result_ be Call(_func_, _thisValue_, _argList_).
@@ -26292,7 +26291,7 @@
           1. If _func_ is a <emu-xref href="#sec-built-in-function-objects">built-in function object</emu-xref>, then return an implementation-defined String source code representation of _func_. The representation must have the syntax of a |NativeFunction|. Additionally, if _func_ has an [[InitialName]] internal slot and _func_.[[InitialName]] is a String, the portion of the returned String that would be matched by |NativeFunctionAccessor?| |PropertyName| must be the value of _func_.[[InitialName]].
           1. If Type(_func_) is Object and _func_ has a [[SourceText]] internal slot and _func_.[[SourceText]] is a sequence of Unicode code points and ! HostHasSourceTextAvailable(_func_) is *true*, then
             1. Return ! CodePointsToString(_func_.[[SourceText]]).
-          1. If Type(_func_) is Object and IsCallable(_func_) is *true*, then return an implementation-defined String source code representation of _func_. The representation must have the syntax of a |NativeFunction|.
+          1. If ! IsCallable(_func_) is *true*, then return an implementation-defined String source code representation of _func_. The representation must have the syntax of a |NativeFunction|.
           1. Throw a *TypeError* exception.
         </emu-alg>
 
@@ -37664,25 +37663,22 @@ THH:mm:ss.sss
         1. Let _stack_ be a new empty List.
         1. Let _indent_ be the empty String.
         1. Let _PropertyList_ and _ReplacerFunction_ be *undefined*.
-        1. If Type(_replacer_) is Object, then
-          1. If IsCallable(_replacer_) is *true*, then
-            1. Set _ReplacerFunction_ to _replacer_.
-          1. Else,
-            1. Let _isArray_ be ? IsArray(_replacer_).
-            1. If _isArray_ is *true*, then
-              1. Set _PropertyList_ to a new empty List.
-              1. Let _len_ be ? LengthOfArrayLike(_replacer_).
-              1. Let _k_ be 0.
-              1. Repeat, while _k_ &lt; _len_,
-                1. Let _v_ be ? Get(_replacer_, ! ToString(_k_)).
-                1. Let _item_ be *undefined*.
-                1. If Type(_v_) is String, set _item_ to _v_.
-                1. Else if Type(_v_) is Number, set _item_ to ! ToString(_v_).
-                1. Else if Type(_v_) is Object, then
-                  1. If _v_ has a [[StringData]] or [[NumberData]] internal slot, set _item_ to ? ToString(_v_).
-                1. If _item_ is not *undefined* and _item_ is not currently an element of _PropertyList_, then
-                  1. Append _item_ to the end of _PropertyList_.
-                1. Set _k_ to _k_ + 1.
+        1. If ! IsCallable(_replacer_) is *true*, then
+          1. Set _ReplacerFunction_ to _replacer_.
+        1. Else if ? IsArray(_replacer_) is *true*, then
+          1. Set _PropertyList_ to a new empty List.
+          1. Let _len_ be ? LengthOfArrayLike(_replacer_).
+          1. Let _k_ be 0.
+          1. Repeat, while _k_ &lt; _len_,
+            1. Let _v_ be ? Get(_replacer_, ! ToString(_k_)).
+            1. Let _item_ be *undefined*.
+            1. If Type(_v_) is String, set _item_ to _v_.
+            1. Else if Type(_v_) is Number, set _item_ to ! ToString(_v_).
+            1. Else if Type(_v_) is Object, then
+              1. If _v_ has a [[StringData]] or [[NumberData]] internal slot, set _item_ to ? ToString(_v_).
+            1. If _item_ is not *undefined* and _item_ is not currently an element of _PropertyList_, then
+              1. Append _item_ to the end of _PropertyList_.
+            1. Set _k_ to _k_ + 1.
         1. If Type(_space_) is Object, then
           1. If _space_ has a [[NumberData]] internal slot, then
             1. Set _space_ to ? ToNumber(_space_).
